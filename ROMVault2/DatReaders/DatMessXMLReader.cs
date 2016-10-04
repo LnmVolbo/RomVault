@@ -16,7 +16,7 @@ namespace ROMVault2.DatReaders
 
         public static bool ReadDat(ref RvDir tDat, XmlDocument doc)
         {
-            FileType thisFileType = FileType.Unknown; // added
+            FileType thisFileType = FileType.Unknown;
 
             if (!LoadHeaderFromDat(ref tDat, ref doc, ref thisFileType))
                 return false;
@@ -64,8 +64,7 @@ namespace ROMVault2.DatReaders
                     tDat.AddData(RvDat.DatData.MergeType, "split");
                     break;
             }
-            
-            // deterime whether to compress to .zip or store as files
+
             val = VarFix.String(head[0].Attributes.GetNamedItem("forcepacking")).ToLower();
             switch (val.ToLower())
             {
@@ -95,12 +94,12 @@ namespace ROMVault2.DatReaders
             RvDir parent = tDat;
 
             RvDir tDir = new RvDir(DBTypeGet.DirFromFile(thisFileType))
-                        {
-                            Name = VarFix.CleanFileName(gameNode.Attributes.GetNamedItem("name")),
-                            Game = new RvGame(),
-                            Dat = tDat.Dat,
-                            DatStatus = DatStatus.InDatCollect
-                        };
+            {
+                Name = VarFix.CleanFileName(gameNode.Attributes.GetNamedItem("name")),
+                Game = new RvGame(),
+                Dat = tDat.Dat,
+                DatStatus = DatStatus.InDatCollect
+            };
 
 
             tDir.Game.AddData(RvGame.GameData.Description, VarFix.String(gameNode.SelectSingleNode("description")));
@@ -113,13 +112,13 @@ namespace ROMVault2.DatReaders
 
 
             RvDir tDirCHD = new RvDir(FileType.Dir)
-                        {
-                            Name = VarFix.CleanFileName(gameNode.Attributes.GetNamedItem("name")),
-                            Game = new RvGame(),
-                            Dat = tDat.Dat,
-                            DatStatus = DatStatus.InDatCollect
+            {
+                Name = VarFix.CleanFileName(gameNode.Attributes.GetNamedItem("name")),
+                Game = new RvGame(),
+                Dat = tDat.Dat,
+                DatStatus = DatStatus.InDatCollect
 
-                        };
+            };
 
             tDirCHD.Game.AddData(RvGame.GameData.Description, VarFix.String(gameNode.SelectSingleNode("description")));
 
@@ -192,15 +191,15 @@ namespace ROMVault2.DatReaders
             if (name != null)
             {
                 RvFile tRom = new RvFile(thisFileType) // changed
-                                     {
-                                         Name = VarFix.CleanFullFileName(name),
-                                         Size = VarFix.ULong(romNode.Attributes.GetNamedItem("size")),
-                                         CRC = VarFix.CleanMD5SHA1(romNode.Attributes.GetNamedItem("crc"), 8),
-                                         SHA1 = VarFix.CleanMD5SHA1(romNode.Attributes.GetNamedItem("sha1"), 40),
-                                         Status = VarFix.ToLower(romNode.Attributes.GetNamedItem("status")),
+                {
+                    Name = VarFix.CleanFullFileName(name),
+                    Size = VarFix.ULong(romNode.Attributes.GetNamedItem("size")),
+                    CRC = VarFix.CleanMD5SHA1(romNode.Attributes.GetNamedItem("crc"), 8),
+                    SHA1 = VarFix.CleanMD5SHA1(romNode.Attributes.GetNamedItem("sha1"), 40),
+                    Status = VarFix.ToLower(romNode.Attributes.GetNamedItem("status")),
 
-                                         Dat = tGame.Dat
-                                     };
+                    Dat = tGame.Dat
+                };
 
                 if (tRom.Size != null) tRom.FileStatusSet(FileStatus.SizeFromDAT);
                 if (tRom.CRC != null) tRom.FileStatusSet(FileStatus.CRCFromDAT);
@@ -208,12 +207,11 @@ namespace ROMVault2.DatReaders
 
                 _indexContinue = tGame.ChildAdd(tRom);
             }
-            else if (loadflag.ToLower() == "continue")
+            else if (loadflag.ToLower() == "continue" || loadflag.ToLower()=="ignore")
             {
                 RvFile tZippedFile = (RvFile)tGame.Child(_indexContinue);
                 tZippedFile.Size += VarFix.ULong(romNode.Attributes.GetNamedItem("size"));
             }
-
         }
 
         private static void LoadDiskFromDat(ref RvDir tGame, XmlNode romNode)
